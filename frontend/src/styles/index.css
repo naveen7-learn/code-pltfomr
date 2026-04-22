@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-base-950 text-slate-100 font-sans antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 30%),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(2, 6, 23, 1), rgba(15, 23, 42, 1));
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.glass-panel {
+  @apply border border-white/10 bg-white/5 backdrop-blur-xl shadow-glow;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-cyan-300 via-sky-400 to-emerald-300 bg-clip-text text-transparent;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+body.light-mode {
+  background-image:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 24%),
+    linear-gradient(180deg, rgb(241, 245, 249), rgb(226, 232, 240));
+  color: #0f172a;
+}
+
+.light-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 50px rgba(15, 23, 42, 0.08);
+}
+
+.light-mode .text-white,
+.light-mode .text-slate-100 {
+  color: #0f172a;
+}
+
+.light-mode .text-slate-200,
+.light-mode .text-slate-300 {
+  color: #334155;
+}
+
+.light-mode .text-slate-400,
+.light-mode .text-slate-500 {
+  color: #64748b;
+}
+
+.light-mode .bg-white\/5,
+.light-mode .bg-slate-950\/60,
+.light-mode .bg-slate-950\/70 {
+  background-color: rgba(255, 255, 255, 0.66);
+}
+
+.light-mode .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.light-mode .from-cyan-400\/10,
+.light-mode .to-emerald-300\/5,
+.light-mode .bg-cyan-400\/10,
+.light-mode .bg-cyan-400\/15,
+.light-mode .bg-emerald-400\/15,
+.light-mode .bg-rose-400\/15 {
+  backdrop-filter: blur(12px);
+}
