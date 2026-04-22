@@ -25,31 +25,23 @@ export const EditorPanel = ({ file, theme, onSave }) => {
   }, [file, onSave, value]);
 
   if (!file) {
-    return (
-      <div className="glass-panel flex h-full items-center justify-center rounded-[28px] text-slate-400">
-        Select a file to start reviewing code.
-      </div>
-    );
+    return <div className="card flex h-full items-center justify-center rounded-[28px] text-neutral-400 light-mode:text-slate-500">Select a file to start reviewing code.</div>;
   }
 
   return (
-    <div className="glass-panel flex h-full flex-col overflow-hidden rounded-[28px]">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.22 }} className="card flex h-full flex-col overflow-hidden rounded-[28px]">
+      <div className="flex items-center justify-between border-b px-4 py-3 divider">
         <div>
-          <p className="font-medium text-white">{file.name}</p>
-          <p className="text-xs text-slate-500">{file.path}</p>
+          <p className="font-medium text-neutral-100 light-mode:text-slate-950">{file.name}</p>
+          <p className="text-xs text-neutral-500 light-mode:text-slate-500">{file.path}</p>
         </div>
-        <motion.button
-          whileTap={{ scale: 0.94 }}
-          onClick={() => onSave({ ...file, content: value })}
-          className="flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm text-cyan-100"
-        >
+        <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.94 }} onClick={() => onSave({ ...file, content: value })} className="pill-button rounded-2xl px-3 py-2 text-sm">
           <Save size={14} />
-          Save
+          <span className="ml-2">Save</span>
         </motion.button>
       </div>
 
-      <div className="min-h-[460px] flex-1">
+      <div className="min-h-[460px] flex-1 overflow-hidden rounded-b-[28px]">
         <Editor
           height="100%"
           value={value}
@@ -61,10 +53,11 @@ export const EditorPanel = ({ file, theme, onSave }) => {
             fontSize: 14,
             lineNumbers: "on",
             scrollBeyondLastLine: false,
-            fontFamily: "JetBrains Mono"
+            fontFamily: "IBM Plex Mono",
+            padding: { top: 18, bottom: 18 }
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };

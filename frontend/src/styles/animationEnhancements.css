@@ -1,0 +1,93 @@
+.pill-button,
+.ghost-button,
+.card-interactive,
+.command-result,
+.nav-link-premium {
+  will-change: transform, opacity;
+}
+
+.pill-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.pill-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform 520ms ease;
+  pointer-events: none;
+}
+
+.pill-button:hover::after {
+  transform: translateX(130%);
+}
+
+.ghost-button,
+.command-result,
+.nav-link-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.ghost-button::before,
+.command-result::before,
+.nav-link-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 58%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+
+.ghost-button:hover::before,
+.command-result:hover::before,
+.nav-link-premium:hover::before {
+  opacity: 1;
+}
+
+.floating-orb {
+  animation: float-orb 7s ease-in-out infinite;
+}
+
+.soft-breathe {
+  animation: soft-breathe 5s ease-in-out infinite;
+}
+
+@keyframes float-orb {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes soft-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(92, 124, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(92, 124, 255, 0.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-button::after,
+  .ghost-button::before,
+  .command-result::before,
+  .nav-link-premium::before {
+    transition: none;
+  }
+
+  .floating-orb,
+  .soft-breathe {
+    animation: none;
+  }
+}

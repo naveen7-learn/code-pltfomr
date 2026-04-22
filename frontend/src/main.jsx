@@ -4,6 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import "./styles/index.css";
+import "./styles/lightModeFixes.css";
+import "./styles/animationEnhancements.css";
+import "./styles/animationEnhancements.css";
+import "./styles/animationEnhancements.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

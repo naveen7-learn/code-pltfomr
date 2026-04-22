@@ -26,30 +26,36 @@ export const AppShell = ({ children, notifications, theme, onToggleTheme, search
   }, [query, searchableItems]);
 
   return (
-    <div className="grid min-h-screen grid-cols-1 gap-4 p-4 md:grid-cols-[auto_1fr]">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((current) => !current)} />
-      <div className="space-y-4">
-        <Topbar
-          onSearch={() => setPaletteOpen(true)}
-          notifications={notifications}
-          theme={theme}
-          onToggleTheme={onToggleTheme}
-        />
-        <main className="min-h-[calc(100vh-8rem)]">{children}</main>
-      </div>
+    <div className="flex min-h-screen overflow-hidden px-3 py-3 md:px-4">
+      <div className="premium-shell flex min-h-[calc(100vh-1.5rem)] w-full overflow-hidden rounded-[32px] border border-white/5 bg-neutral-950/70 shadow-panel backdrop-blur-xl">
+        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((current) => !current)} />
 
-      <CommandPalette
-        open={paletteOpen}
-        query={query}
-        onQueryChange={setQuery}
-        results={results}
-        onClose={() => setPaletteOpen(false)}
-        onSelect={(item) => {
-          navigate(item.to);
-          setPaletteOpen(false);
-        }}
-      />
-      <NotificationCenter notifications={notifications} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar
+            onSearch={() => setPaletteOpen(true)}
+            notifications={notifications}
+            theme={theme}
+            onToggleTheme={onToggleTheme}
+          />
+
+          <main className="flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-[1440px] p-4 md:p-6">{children}</div>
+          </main>
+        </div>
+
+        <CommandPalette
+          open={paletteOpen}
+          query={query}
+          onQueryChange={setQuery}
+          results={results}
+          onClose={() => setPaletteOpen(false)}
+          onSelect={(item) => {
+            navigate(item.to);
+            setPaletteOpen(false);
+          }}
+        />
+        <NotificationCenter notifications={notifications} />
+      </div>
     </div>
   );
 };
