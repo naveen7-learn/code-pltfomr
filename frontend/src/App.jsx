@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
+import { CustomCursor } from "./components/CustomCursor";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ProjectPage } from "./pages/ProjectPage";
@@ -81,20 +82,24 @@ export default function App() {
   );
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div key={user ? "app" : "auth"} {...pageTransition}>
-        <Routes>
-          <Route path="/auth/:mode" element={<AuthPage />} />
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <ProtectedLayout {...shellProps} />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+    <>
+      <div className="app-backdrop" />
+      <CustomCursor />
+      <AnimatePresence mode="wait">
+        <motion.div key={user ? "app" : "auth"} {...pageTransition}>
+          <Routes>
+            <Route path="/auth/:mode" element={<AuthPage />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <ProtectedLayout {...shellProps} />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </motion.div>
+      </AnimatePresence>
+    </>
   );
 }

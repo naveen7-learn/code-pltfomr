@@ -2,21 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCheck, MessageSquarePlus, XCircle } from "lucide-react";
-import {
-  fetchPullRequest,
-  submitReview,
-  updatePullRequestStatus
-} from "../services/pullRequestService";
-import {
-  createComment,
-  fetchComments,
-  toggleCommentReaction,
-  toggleCommentResolved
-} from "../services/commentService";
+import { fetchPullRequest, submitReview, updatePullRequestStatus } from "../services/pullRequestService";
+import { createComment, fetchComments, toggleCommentReaction, toggleCommentResolved } from "../services/commentService";
 import { DiffViewer } from "../components/DiffViewer";
 import { CommentThread } from "../components/CommentThread";
 import { Timeline } from "../components/Timeline";
 import { useSocket } from "../hooks/useSocket";
+import { listItemIn, riseIn, staggerContainer } from "../animations/pageTransitions";
 
 export const PullRequestPage = ({ onNotify, authUser }) => {
   const { projectId, pullRequestId } = useParams();
@@ -95,11 +87,11 @@ export const PullRequestPage = ({ onNotify, authUser }) => {
   const statusTone = useMemo(() => {
     switch (pullRequest?.status) {
       case "approved":
-        return "bg-emerald-400/15 text-emerald-200";
+        return "border-emerald-400/20 bg-emerald-500/10 text-emerald-300 light-mode:text-emerald-700";
       case "changes_requested":
-        return "bg-rose-400/15 text-rose-200";
+        return "border-rose-400/20 bg-rose-500/10 text-rose-300 light-mode:text-rose-700";
       default:
-        return "bg-cyan-400/15 text-cyan-200";
+        return "border-accent-400/20 bg-accent-500/10 text-accent-200 light-mode:text-accent-700";
     }
   }, [pullRequest?.status]);
 
@@ -131,59 +123,54 @@ export const PullRequestPage = ({ onNotify, authUser }) => {
   };
 
   if (!pullRequest) {
-    return <div className="glass-panel rounded-[28px] p-8 text-slate-300">Loading pull request...</div>;
+    return <div className="card rounded-[28px] p-8 text-neutral-300 light-mode:text-slate-700">Loading pull request...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-[32px] p-6">
+      <motion.div {...riseIn} className="card p-6 md:p-7">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.28em] text-cyan-200/70">Pull request</p>
-            <h1 className="mt-3 text-4xl font-semibold text-white">{pullRequest.title}</h1>
-            <p className="mt-3 max-w-3xl text-slate-300">{pullRequest.description}</p>
+            <p className="eyebrow">Pull request</p>
+            <h1 className="mt-3 font-display text-4xl font-semibold tracking-[-0.04em] text-neutral-100 light-mode:text-slate-950">{pullRequest.title}</h1>
+            <p className="mt-3 max-w-3xl text-neutral-400 light-mode:text-slate-600">{pullRequest.description}</p>
           </div>
-          <div className={`rounded-full px-4 py-3 text-sm capitalize ${statusTone}`}>
+          <motion.div whileHover={{ y: -1 }} className={`rounded-full border px-4 py-3 text-sm capitalize ${statusTone}`}>
             {pullRequest.status.replace("_", " ")}
-          </div>
+          </motion.div>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => handleReview("approved")}
-            className="rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-medium text-slate-950"
-          >
+          <motion.button whileHover={{ y: -2, scale: 1.01 }} whileTap={{ scale: 0.96 }} onClick={() => handleReview("approved")} className="pill-button rounded-2xl px-4 py-3 text-sm">
             <CheckCheck size={16} className="mr-2 inline" />
             Approve
           </motion.button>
           <motion.button
+            whileHover={{ y: -2 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => handleReview("changes_requested")}
-            className="rounded-2xl bg-rose-400 px-4 py-3 text-sm font-medium text-slate-950"
+            className="inline-flex items-center rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-200 light-mode:text-rose-700"
           >
             <XCircle size={16} className="mr-2 inline" />
             Request changes
           </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => handleLineComment(1)}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200"
-          >
+          <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.96 }} onClick={() => handleLineComment(1)} className="ghost-button rounded-2xl px-4 py-3 text-sm">
             <MessageSquarePlus size={16} className="mr-2 inline" />
             Add comment
           </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid gap-6 xl:grid-cols-[0.65fr_0.35fr]">
-        <div className="space-y-6">
-          {(pullRequest.changedFiles || []).map((file) => (
-            <DiffViewer key={file.path} file={file} onLineComment={handleLineComment} />
+        <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.06 }} className="space-y-6">
+          {(pullRequest.changedFiles || []).map((file, index) => (
+            <motion.div key={file.path} {...listItemIn} transition={{ ...listItemIn.transition, delay: 0.04 * index }}>
+              <DiffViewer file={file} onLineComment={handleLineComment} />
+            </motion.div>
           ))}
           <Timeline events={pullRequest.timeline || []} />
-        </div>
+        </motion.div>
 
-        <div className="space-y-6">
+        <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.1 }} className="space-y-6">
           <CommentThread
             comments={comments}
             typingUsers={typingUsers}
@@ -197,22 +184,34 @@ export const PullRequestPage = ({ onNotify, authUser }) => {
             }}
           />
 
-          <div className="glass-panel rounded-[28px] p-4">
+          <div className="card p-4 md:p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Review decisions</h3>
-              <span className="text-xs text-slate-500">{reviews.length} reviews</span>
+              <h3 className="surface-label">Review decisions</h3>
+              <span className="text-xs text-neutral-500 light-mode:text-slate-500">{reviews.length} reviews</span>
             </div>
-            <div className="space-y-3">
-              {reviews.map((review) => (
-                <div key={review._id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="font-medium text-white">{review.reviewer?.name}</p>
-                  <p className="mt-1 text-sm capitalize text-slate-300">{review.status.replace("_", " ")}</p>
-                  <p className="mt-2 text-sm text-slate-400">{review.summary}</p>
+            <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-3">
+              {reviews.length > 0 ? (
+                reviews.map((review, index) => (
+                  <motion.div
+                    key={review._id}
+                    {...listItemIn}
+                    transition={{ ...listItemIn.transition, delay: 0.04 * index + 0.04 }}
+                    whileHover={{ y: -2 }}
+                    className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 light-mode:border-slate-300/70 light-mode:bg-white/78"
+                  >
+                    <p className="font-medium text-neutral-100 light-mode:text-slate-950">{review.reviewer?.name}</p>
+                    <p className="mt-1 text-sm capitalize text-neutral-300 light-mode:text-slate-700">{review.status.replace("_", " ")}</p>
+                    <p className="mt-2 text-sm text-neutral-500 light-mode:text-slate-500">{review.summary}</p>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="rounded-[22px] border border-dashed border-white/10 px-4 py-10 text-center light-mode:border-slate-300/80">
+                  <p className="text-sm text-neutral-500 light-mode:text-slate-500">No review decisions yet</p>
                 </div>
-              ))}
-            </div>
+              )}
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
