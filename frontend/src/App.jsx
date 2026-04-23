@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
 import { CustomCursor } from "./components/CustomCursor";
 import { AuthPage } from "./pages/AuthPage";
@@ -12,6 +12,12 @@ import { ProjectPage } from "./pages/ProjectPage";
 import { PullRequestPage } from "./pages/PullRequestPage";
 import { useAuth } from "./context/AuthContext";
 import { pageTransition } from "./animations/pageTransitions";
+
+// Components & Hooks
+import { useSocket } from "./hooks/useSocket"; 
+import CodeCollabPage from "./pages/CodeCollabPage"; 
+import CollabWorkspace from "./pages/CollabWorkspace"; // 🆕 New Workspace Page
+import { CollabInviteModal } from "./components/CollabInviteModal"; 
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -29,22 +35,67 @@ const ProtectedRoute = ({ children }) => {
 
 const ProtectedLayout = ({ theme, onToggleTheme, notifications, searchableItems, onSearchIndex, onNotify }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const socket = useSocket(!!user);
+
+  const [inviteData, setInviteData] = useState({ 
+    isOpen: false, 
+    inviterName: "", 
+    roomId: "" 
+  });
+
+  useEffect(() => {
+    if (user && socket) {
+      socket.emit("register-user", user._id);
+
+      socket.on("receive-invite", ({ roomId, inviterName }) => {
+        setInviteData({ 
+          isOpen: true, 
+          inviterName, 
+          roomId 
+        });
+      });
+    }
+
+    return () => {
+      if (socket) socket.off("receive-invite");
+    };
+  }, [user, socket]);
 
   return (
-    <AppShell notifications={notifications} theme={theme} onToggleTheme={onToggleTheme} searchableItems={searchableItems}>
-      <Routes>
+    <>
+      <CollabInviteModal 
+        isOpen={inviteData.isOpen}
+        inviterName={inviteData.inviterName}
+        onAccept={() => {
+          setInviteData((prev) => ({ ...prev, isOpen: false }));
+          navigate(`/code-collab/${inviteData.roomId}`); // 🚀 Teleports you to the code room
+        }}
+        onDecline={() => setInviteData((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      <AppShell notifications={notifications} theme={theme} onToggleTheme={onToggleTheme} searchableItems={searchableItems}>
+        <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage onSearchIndex={onSearchIndex} onNotify={onNotify} />} />
           <Route path="/pull-requests" element={<GlobalPullRequestsPage onSearchIndex={onSearchIndex} />} />
           <Route path="/reviews" element={<GlobalReviewsPage onSearchIndex={onSearchIndex} />} />
           <Route path="/insights" element={<InsightsPage />} />
+          
+          {/* Main Search Page */}
+          <Route path="/code-collab" element={<CodeCollabPage socket={socket} />} />
+          
+          {/* 🆕 THE ACTUAL MULTIPLAYER ROOM */}
+          <Route path="/code-collab/:roomId" element={<CollabWorkspace socket={socket} />} />
+          
           <Route path="/projects/:projectId" element={<ProjectPage theme={theme} onNotify={onNotify} onSearchIndex={onSearchIndex} />} />
           <Route
             path="/projects/:projectId/pull-requests/:pullRequestId"
             element={<PullRequestPage authUser={user} onNotify={onNotify} />}
           />
-      </Routes>
-    </AppShell>
+        </Routes>
+      </AppShell>
+    </>
   );
 };
 

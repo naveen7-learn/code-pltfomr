@@ -9,9 +9,12 @@ import { setIo } from "./services/socketRegistry.js";
 const port = process.env.PORT || 5000;
 const app = createApp();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    // 👇 Added a fallback to ensure localhost:5173 is always allowed
+    origin: process.env.CLIENT_URL || "http://localhost:5173", 
+    methods: ["GET", "POST"],
     credentials: true
   }
 });
@@ -23,6 +26,8 @@ connectDatabase()
   .then(() => {
     server.listen(port, () => {
       console.log(`Backend listening on port ${port}`);
+      // Log this to confirm your CORS is pointing to the right place
+      console.log(`CORS origin allowed: ${process.env.CLIENT_URL || "http://localhost:5173"}`);
     });
   })
   .catch((error) => {

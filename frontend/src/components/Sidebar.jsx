@@ -1,14 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Code2, FolderGit2, GitPullRequest, LayoutDashboard, PanelLeftClose, Sparkles } from "lucide-react";
+// Added 'Users' to the lucide-react imports for the new feature
+import { ArrowUpRight, Code2, FolderGit2, GitPullRequest, LayoutDashboard, PanelLeftClose, Sparkles, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { listItemIn } from "../animations/pageTransitions";
 
 const links = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Projects", to: "/dashboard", icon: FolderGit2 },
+  { label: "Projects", to: "/projects", icon: FolderGit2 }, // Fixed this route for you!
   { label: "Pull Requests", to: "/pull-requests", icon: GitPullRequest },
   { label: "Reviews", to: "/reviews", icon: Code2 },
-  { label: "Insights", to: "/insights", icon: Sparkles }
+  { label: "Insights", to: "/insights", icon: Sparkles },
+  // 👇 Here is the new Code Collab feature added to your existing array
+  { label: "Code Collab", to: "/code-collab", icon: Users } 
 ];
 
 export const Sidebar = ({ collapsed, onToggle }) => (
