@@ -4,8 +4,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { getIo } from "../services/socketRegistry.js";
 
 const ensureAccess = (project, userId) => {
-  const isOwner = project.owner.toString() === userId.toString();
-  const isMember = project.members.some((member) => member.toString() === userId.toString());
+  const isOwner = (project.owner._id || project.owner).toString() === userId.toString();
+  const isMember = project.members.some((member) => (member._id || member).toString() === userId.toString());
   return isOwner || isMember;
 };
 
@@ -117,8 +117,8 @@ export const saveFile = asyncHandler(async (req, res) => {
   const existingFile = project.files.find((file) => file.path === path);
 
   if (existingFile) {
-    existingFile.name = name;
-    existingFile.type = type;
+    existingFile.name = name || existingFile.name;
+    existingFile.type = type || existingFile.type;
     existingFile.content = content ?? existingFile.content;
     existingFile.language = language ?? existingFile.language;
   } else {

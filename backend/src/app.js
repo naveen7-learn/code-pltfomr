@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import pullRequestRoutes from "./routes/pullRequestRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 export const createApp = () => {
@@ -43,6 +44,7 @@ export const createApp = () => {
   app.use("/api/projects", projectRoutes);
   app.use("/api/projects/:projectId/pull-requests", pullRequestRoutes);
   app.use("/api/projects/:projectId/pull-requests/:pullRequestId/comments", commentRoutes);
+  app.use("/api/user", userRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

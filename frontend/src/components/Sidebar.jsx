@@ -6,9 +6,9 @@ import { listItemIn } from "../animations/pageTransitions";
 const links = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", to: "/dashboard", icon: FolderGit2 },
-  { label: "Pull Requests", to: "/dashboard", icon: GitPullRequest },
-  { label: "Reviews", to: "/dashboard", icon: Code2 },
-  { label: "Insights", to: "/dashboard", icon: Sparkles }
+  { label: "Pull Requests", to: "/pull-requests", icon: GitPullRequest },
+  { label: "Reviews", to: "/reviews", icon: Code2 },
+  { label: "Insights", to: "/insights", icon: Sparkles }
 ];
 
 export const Sidebar = ({ collapsed, onToggle }) => (

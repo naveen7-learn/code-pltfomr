@@ -28,6 +28,18 @@ export const EditorPanel = ({ file, theme, onSave }) => {
     return <div className="card flex h-full items-center justify-center rounded-[28px] text-neutral-400 light-mode:text-slate-500">Select a file to start reviewing code.</div>;
   }
 
+  const handleEditorWillMount = (monaco) => {
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+    });
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      allowJs: true
+    });
+  };
+
   return (
     <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.22 }} className="card flex h-full flex-col overflow-hidden rounded-[28px]">
       <div className="flex items-center justify-between border-b px-4 py-3 divider">
@@ -48,6 +60,7 @@ export const EditorPanel = ({ file, theme, onSave }) => {
           defaultLanguage={file.language || "javascript"}
           theme={theme === "dark" ? "vs-dark" : "light"}
           onChange={(nextValue) => setValue(nextValue || "")}
+          beforeMount={handleEditorWillMount}
           options={{
             minimap: { enabled: false },
             fontSize: 14,

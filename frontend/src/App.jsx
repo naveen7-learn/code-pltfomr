@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
 import { CustomCursor } from "./components/CustomCursor";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { GlobalPullRequestsPage } from "./pages/GlobalPullRequestsPage";
+import { GlobalReviewsPage } from "./pages/GlobalReviewsPage";
+import { InsightsPage } from "./pages/InsightsPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { PullRequestPage } from "./pages/PullRequestPage";
 import { useAuth } from "./context/AuthContext";
@@ -30,13 +33,16 @@ const ProtectedLayout = ({ theme, onToggleTheme, notifications, searchableItems,
   return (
     <AppShell notifications={notifications} theme={theme} onToggleTheme={onToggleTheme} searchableItems={searchableItems}>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage onSearchIndex={onSearchIndex} onNotify={onNotify} />} />
-        <Route path="/projects/:projectId" element={<ProjectPage theme={theme} onNotify={onNotify} onSearchIndex={onSearchIndex} />} />
-        <Route
-          path="/projects/:projectId/pull-requests/:pullRequestId"
-          element={<PullRequestPage authUser={user} onNotify={onNotify} />}
-        />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage onSearchIndex={onSearchIndex} onNotify={onNotify} />} />
+          <Route path="/pull-requests" element={<GlobalPullRequestsPage onSearchIndex={onSearchIndex} />} />
+          <Route path="/reviews" element={<GlobalReviewsPage onSearchIndex={onSearchIndex} />} />
+          <Route path="/insights" element={<InsightsPage />} />
+          <Route path="/projects/:projectId" element={<ProjectPage theme={theme} onNotify={onNotify} onSearchIndex={onSearchIndex} />} />
+          <Route
+            path="/projects/:projectId/pull-requests/:pullRequestId"
+            element={<PullRequestPage authUser={user} onNotify={onNotify} />}
+          />
       </Routes>
     </AppShell>
   );
@@ -54,20 +60,20 @@ export default function App() {
     document.body.classList.toggle("light-mode", theme === "light");
   }, [theme]);
 
-  const onNotify = (notification) => {
+  const onNotify = useCallback((notification) => {
     setNotifications((current) => [notification, ...current]);
     setTimeout(() => {
       setNotifications((current) => current.filter((entry) => entry.id !== notification.id));
     }, 4000);
-  };
+  }, []);
 
-  const onSearchIndex = (items) => {
+  const onSearchIndex = useCallback((items) => {
     setSearchableItems((current) => {
       const merged = [...current, ...items];
       const unique = new Map(merged.map((item) => [`${item.type}-${item.id}`, item]));
       return Array.from(unique.values());
     });
-  };
+  }, []);
 
   const shellProps = useMemo(
     () => ({
