@@ -1,38 +1,36 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-export const useSocket = (enabled = true) => {
-  const socket = useMemo(() => {
-    if (!enabled) {
-      return null;
-    }
+// Ensure this matches your backend port exactly
+const SOCKET_URL = "http://localhost:5000";
 
-    // Grab the URL, but let's log it so we know EXACTLY where it's pointing
-    const url = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
-    console.log("🔌 React is attempting socket connection to:", url);
-
-    return io(url, {
-      transports: ["websocket"]
-    });
-  }, [enabled]);
+export const useSocket = (shouldConnect) => {
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!shouldConnect) return;
 
-    // Aggressive debugging listeners
-    socket.on("connect", () => {
-      console.log("✅ Socket officially connected! ID:", socket.id);
+    // We add 'transports' to force it to try multiple ways to connect
+    const newSocket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"],
+      withCredentials: true,
+      reconnectionAttempts: 5,
     });
 
-    socket.on("connect_error", (err) => {
+    newSocket.on("connect", () => {
+      console.log("✅ Socket connected to backend!");
+    });
+
+    newSocket.on("connect_error", (err) => {
       console.error("❌ Socket connection error:", err.message);
     });
 
+    setSocket(newSocket);
+
     return () => {
-      console.log("🔌 Disconnecting socket...");
-      socket.disconnect();
+      newSocket.close();
     };
-  }, [socket]);
+  }, [shouldConnect]);
 
   return socket;
 };

@@ -31,8 +31,26 @@ const ProtectedLayout = ({ theme, onToggleTheme, notifications, searchableItems,
   const [inviteData, setInviteData] = useState({ isOpen: false, inviterName: "", roomId: "", inviterSocketId: "" });
 
   useEffect(() => {
+    // Check if BOTH user and socket are present and connected
     if (user && socket) {
-      socket.emit("register-user", String(user._id));
+      
+      // Function to handle registration
+      const handleRegister = () => {
+        const uid = String(user._id || user.id).trim();
+        socket.emit("register-user", uid);
+        console.log("Attempting to register user:", uid);
+      };
+
+      // Register immediately if already connected, otherwise wait for connect event
+      if (socket.connected) {
+        handleRegister();
+      } else {
+        socket.on("connect", handleRegister);
+      }
+
+      // Cleanup old listeners to prevent bugs
+      socket.off("receive-invite");
+      socket.off("invite-accepted");
 
       socket.on("receive-invite", ({ roomId, inviterName, inviterSocketId }) => {
         setInviteData({ isOpen: true, inviterName, roomId, inviterSocketId });
@@ -42,8 +60,10 @@ const ProtectedLayout = ({ theme, onToggleTheme, notifications, searchableItems,
         navigate(`/code-collab/${roomId}`);
       });
     }
+
     return () => {
       if (socket) {
+        socket.off("connect");
         socket.off("receive-invite");
         socket.off("invite-accepted");
       }

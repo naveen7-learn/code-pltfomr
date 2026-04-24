@@ -44,21 +44,41 @@ const CodeCollabPage = ({ socket }) => {
 
   const handleInvite = () => {
     const targetId = searchInput.trim();
-    if (!targetId || !socket || status !== "idle") return;
+    
+    // 1. Check if socket actually exists
+    if (!socket || !socket.connected) {
+      alert("Socket not connected. Please refresh the page.");
+      return;
+    }
+
+    if (!targetId || status !== "idle") return;
 
     setStatus("inviting");
     const newRoomId = uuidv4();
 
-    // Verify user existence via callback
+    console.log("Attempting to emit send-invite to:", targetId);
+
+    // 2. Add a safety timeout (If server doesn't respond in 5s, stop roaming)
+    const timeout = setTimeout(() => {
+      if (status === "inviting") {
+        setStatus("idle");
+        alert("Request timed out. Server didn't respond.");
+      }
+    }, 5000);
+
+    // 3. Emit the event
     socket.emit("send-invite", {
       targetUserId: targetId,
       roomId: newRoomId,
       inviterName: user?.name || "A friend",
     }, (response) => {
-      if (response.status === "success") {
+      // Clear the safety timeout since we got an answer
+      clearTimeout(timeout);
+
+      if (response && response.status === "success") {
         setStatus("waiting");
       } else {
-        alert(response.message);
+        alert(response?.message || "An unknown error occurred");
         setStatus("idle");
       }
     });

@@ -4,10 +4,7 @@ export const registerSocketHandlers = (io) => {
   io.on("connection", (socket) => {
     console.log("⚡ New client connected:", socket.id);
 
-    // ==========================================
-    // ✅ EXISTING: COLLAB INVITATION (LOCKED)
-    // ==========================================
-    
+    // 1. Register User (This links Mongo ID to Socket ID)
     socket.on("register-user", (userId) => {
       if (!userId) return;
       const stringId = String(userId).trim(); 
@@ -15,22 +12,26 @@ export const registerSocketHandlers = (io) => {
       console.log(`👤 User Registered: ${stringId} -> ${socket.id}`);
     });
 
+    // 2. Send Invite (The fix is here)
     socket.on("send-invite", ({ targetUserId, roomId, inviterName }, callback) => {
       const stringTargetId = String(targetUserId).trim();
       const targetSocketId = getSocketId(stringTargetId);
       
+      console.log(`📩 Checking registry for Target: ${stringTargetId}`);
+
       if (targetSocketId) {
+        // Force the emission to the specific socket
         io.to(targetSocketId).emit("receive-invite", { 
           roomId, 
           inviterName,
           inviterSocketId: socket.id 
         });
         
+        console.log(`🚀 Success: Invite sent to Socket ${targetSocketId}`);
         if (callback) callback({ status: "success", message: "Invite sent!" });
-        console.log(`🚀 Invite routed to ${stringTargetId}`);
       } else {
+        console.log(`❌ Fail: User ${stringTargetId} is not in the registry`);
         if (callback) callback({ status: "error", message: "User is not online or ID is wrong." });
-        console.log(`❌ Target ${stringTargetId} not found.`);
       }
     });
 
@@ -38,23 +39,15 @@ export const registerSocketHandlers = (io) => {
       io.to(inviterSocketId).emit("invite-accepted", { roomId });
     });
 
-    // ==========================================
-    // 🚀 NEW: LIVE COMPILER & CHAT LOGIC
-    // ==========================================
-
-    // 1. Join Room (Must be called when Workspace opens)
+    // 3. Room & Chat Logic
     socket.on("join-collab-room", (roomId) => {
       socket.join(roomId);
-      console.log(`📡 Socket ${socket.id} joined collab room: ${roomId}`);
     });
 
-    // 2. Code Synchronization
     socket.on("code-change", ({ roomId, code }) => {
-      // Sends to everyone in the room except the person typing
       socket.to(roomId).emit("code-update", code);
     });
 
-    // 3. WhatsApp Style Chat
     socket.on("send-chat-message", ({ roomId, message, senderName }) => {
       const messageData = {
         id: Date.now(),
@@ -62,14 +55,9 @@ export const registerSocketHandlers = (io) => {
         sender: senderName,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      // Sends to EVERYONE in the room including the sender
       io.in(roomId).emit("receive-chat-message", messageData);
     });
 
-    // ==========================================
-    // 🔌 CLEANUP
-    // ==========================================
-    
     socket.on("disconnect", () => {
       removeUser(socket.id); 
       console.log("🔌 Client disconnected:", socket.id);
