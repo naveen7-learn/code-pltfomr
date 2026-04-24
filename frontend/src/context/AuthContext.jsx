@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 🔍 Looking for your specific token key
     const token = localStorage.getItem("codeflow_token");
 
     if (!token) {
@@ -17,7 +18,11 @@ export const AuthProvider = ({ children }) => {
 
     meRequest()
       .then(({ user: currentUser }) => setUser(currentUser))
-      .catch(() => localStorage.removeItem("codeflow_token"))
+      .catch(() => {
+        // If token is invalid or expired, wipe it
+        localStorage.removeItem("codeflow_token");
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -38,9 +43,17 @@ export const AuthProvider = ({ children }) => {
     return payload.user;
   };
 
+  // 🚀 UPDATED LOGOUT FUNCTION
   const logout = () => {
+    // 1. Wipe the specific auth token
     localStorage.removeItem("codeflow_token");
+    
+    // 2. Clear the React state
     setUser(null);
+    
+    // 3. HARD REDIRECT: This forces the browser to drop all 
+    // active components and send you to the login screen.
+    window.location.href = "/auth/login";
   };
 
   return (

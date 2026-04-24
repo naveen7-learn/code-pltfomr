@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, BriefcaseBusiness, GitBranchPlus, Plus, ScanSearch, UsersRound } from "lucide-react";
 import { fetchProjects, createProject } from "../services/projectService";
 import { ProjectCard } from "../components/ProjectCard";
@@ -14,6 +14,22 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // 🆕 TYPING EFFECT LOGIC
+  const fullText = "We catch bugs before they become features.";
+  const [displayText, setDisplayText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (displayText.length < fullText.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText(fullText.slice(0, displayText.length + 1));
+      }, 25); // Speed of typing (lower = faster)
+      return () => clearTimeout(timeout);
+    } else {
+      setIsComplete(true);
+    }
+  }, [displayText]);
 
   useEffect(() => {
     fetchProjects()
@@ -62,9 +78,17 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
               <p className="eyebrow">Overview</p>
-              <h1 className="pt-4 font-display text-4xl font-semibold tracking-[-0.04em] text-neutral-100 light-mode:text-slate-950 md:text-5xl">
-                Review work with sharper focus and calmer momentum.
+              
+              {/* 🆕 UPDATED TAGLINE WITH TYPING EFFECT */}
+              <h1 className="min-h-[120px] pt-4 font-display text-4xl font-semibold tracking-[-0.04em] text-neutral-100 light-mode:text-slate-950 md:text-5xl lg:leading-[1.1]">
+                {displayText}
+                <motion.span
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.8 }}
+                  className={`inline-block ml-1 h-8 w-1 bg-accent-400 align-middle ${isComplete ? 'hidden' : ''}`}
+                />
               </h1>
+
               <p className="max-w-xl pt-5 text-base leading-7 text-neutral-400 light-mode:text-slate-600">
                 A cleaner control center for projects, pull requests, and collaboration signals across your team.
               </p>
@@ -95,6 +119,7 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
           </motion.div>
         </motion.div>
 
+        {/* ... Rest of the component (Delivery pulse section, etc.) remains same ... */}
         <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.06 }} className="card p-6 md:p-7">
           <div className="flex items-center justify-between">
             <div>
@@ -129,6 +154,7 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
         </motion.div>
       </section>
 
+      {/* Projects and Timeline sections */}
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
           <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.08 }} className="flex items-center justify-between gap-4">

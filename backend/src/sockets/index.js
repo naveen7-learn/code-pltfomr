@@ -5,53 +5,65 @@ export const registerSocketHandlers = (io) => {
     console.log("⚡ New client connected:", socket.id);
 
     // ==========================================
-    // 🆕 NEW: Live Collaboration Invite System
+    // ✅ EXISTING: COLLAB INVITATION (LOCKED)
     // ==========================================
     
-    // Links a user's database ID to their current socket connection
     socket.on("register-user", (userId) => {
-      addUser(userId, socket.id);
-      console.log(`👤 User ${userId} is online with socket ${socket.id}`);
+      if (!userId) return;
+      const stringId = String(userId).trim(); 
+      addUser(stringId, socket.id);
+      console.log(`👤 User Registered: ${stringId} -> ${socket.id}`);
     });
 
-    // Catches the invite from User A and routes it to User B
-    socket.on("send-invite", ({ targetUserId, roomId, inviterName }) => {
-      const targetSocketId = getSocketId(targetUserId);
+    socket.on("send-invite", ({ targetUserId, roomId, inviterName }, callback) => {
+      const stringTargetId = String(targetUserId).trim();
+      const targetSocketId = getSocketId(stringTargetId);
       
       if (targetSocketId) {
         io.to(targetSocketId).emit("receive-invite", { 
           roomId, 
-          inviterName 
+          inviterName,
+          inviterSocketId: socket.id 
         });
+        
+        if (callback) callback({ status: "success", message: "Invite sent!" });
+        console.log(`🚀 Invite routed to ${stringTargetId}`);
       } else {
-        console.log(`Target user ${targetUserId} is not currently online.`);
+        if (callback) callback({ status: "error", message: "User is not online or ID is wrong." });
+        console.log(`❌ Target ${stringTargetId} not found.`);
       }
     });
 
+    socket.on("accept-invite", ({ roomId, inviterSocketId }) => {
+      io.to(inviterSocketId).emit("invite-accepted", { roomId });
+    });
+
     // ==========================================
-    // 📦 EXISTING: Project & PR Handlers
+    // 🚀 NEW: LIVE COMPILER & CHAT LOGIC
     // ==========================================
-    
-    socket.on("project:join", (projectId) => {
-      socket.join(`project:${projectId}`);
+
+    // 1. Join Room (Must be called when Workspace opens)
+    socket.on("join-collab-room", (roomId) => {
+      socket.join(roomId);
+      console.log(`📡 Socket ${socket.id} joined collab room: ${roomId}`);
     });
 
-    socket.on("pullRequest:join", (pullRequestId) => {
-      socket.join(`pullRequest:${pullRequestId}`);
+    // 2. Code Synchronization
+    socket.on("code-change", ({ roomId, code }) => {
+      // Sends to everyone in the room except the person typing
+      socket.to(roomId).emit("code-update", code);
     });
 
-    socket.on("typing:start", ({ pullRequestId, user }) => {
-      socket.to(`pullRequest:${pullRequestId}`).emit("typing:update", {
-        user,
-        isTyping: true
-      });
-    });
-
-    socket.on("typing:stop", ({ pullRequestId, user }) => {
-      socket.to(`pullRequest:${pullRequestId}`).emit("typing:update", {
-        user,
-        isTyping: false
-      });
+    // 3. WhatsApp Style Chat
+    socket.on("send-chat-message", ({ roomId, message, senderName }) => {
+      const messageData = {
+        id: Date.now(),
+        text: message,
+        sender: senderName,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      // Sends to EVERYONE in the room including the sender
+      io.in(roomId).emit("receive-chat-message", messageData);
     });
 
     // ==========================================
@@ -59,9 +71,7 @@ export const registerSocketHandlers = (io) => {
     // ==========================================
     
     socket.on("disconnect", () => {
-      // 🆕 Remove the user from our tracking map when they leave
       removeUser(socket.id); 
-      socket.removeAllListeners();
       console.log("🔌 Client disconnected:", socket.id);
     });
   });

@@ -1,17 +1,27 @@
 import { AnimatePresence, motion } from "framer-motion";
-// Added 'Users' to the lucide-react imports for the new feature
-import { ArrowUpRight, Code2, FolderGit2, GitPullRequest, LayoutDashboard, PanelLeftClose, Sparkles, Users } from "lucide-react";
+import { 
+  ArrowUpRight, 
+  Code2, 
+  FolderGit2, 
+  GitPullRequest, 
+  LayoutDashboard, 
+  PanelLeftClose, 
+  Sparkles, 
+  Users,
+  Gamepad2 // 🆕 Added for the game section
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { listItemIn } from "../animations/pageTransitions";
 
 const links = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Projects", to: "/projects", icon: FolderGit2 }, // Fixed this route for you!
+  { label: "Projects", to: "/projects", icon: FolderGit2 },
   { label: "Pull Requests", to: "/pull-requests", icon: GitPullRequest },
   { label: "Reviews", to: "/reviews", icon: Code2 },
   { label: "Insights", to: "/insights", icon: Sparkles },
-  // 👇 Here is the new Code Collab feature added to your existing array
-  { label: "Code Collab", to: "/code-collab", icon: Users } 
+  { label: "Code Collab", to: "/code-collab", icon: Users },
+  // 👇 New Game Section added here
+  { label: "Game Section", to: "/games/gesture-draw", icon: Gamepad2 } 
 ];
 
 export const Sidebar = ({ collapsed, onToggle }) => (
