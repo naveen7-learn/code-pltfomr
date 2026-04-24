@@ -323,3 +323,13 @@ body.light-mode {
     transition-duration: 0.01ms !important;
   }
 }
+/* --- CURSOR VISIBILITY FIX --- */
+* {
+    caret-color: #60a5fa !important;
+}
+
+input, textarea, .monaco-editor, [contenteditable="true"] {
+    cursor: text !important;
+    caret-color: #60a5fa !important;
+}
+/* ---------------------------- */

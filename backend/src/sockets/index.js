@@ -4,7 +4,7 @@ export const registerSocketHandlers = (io) => {
   io.on("connection", (socket) => {
     console.log("⚡ New client connected:", socket.id);
 
-    // 1. Register User (This links Mongo ID to Socket ID)
+    // 1. Register User
     socket.on("register-user", (userId) => {
       if (!userId) return;
       const stringId = String(userId).trim(); 
@@ -12,7 +12,7 @@ export const registerSocketHandlers = (io) => {
       console.log(`👤 User Registered: ${stringId} -> ${socket.id}`);
     });
 
-    // 2. Send Invite (The fix is here)
+    // 2. Send Invite
     socket.on("send-invite", ({ targetUserId, roomId, inviterName }, callback) => {
       const stringTargetId = String(targetUserId).trim();
       const targetSocketId = getSocketId(stringTargetId);
@@ -20,7 +20,6 @@ export const registerSocketHandlers = (io) => {
       console.log(`📩 Checking registry for Target: ${stringTargetId}`);
 
       if (targetSocketId) {
-        // Force the emission to the specific socket
         io.to(targetSocketId).emit("receive-invite", { 
           roomId, 
           inviterName,
@@ -45,6 +44,7 @@ export const registerSocketHandlers = (io) => {
     });
 
     socket.on("code-change", ({ roomId, code }) => {
+      // Sends to everyone in the room EXCEPT the sender
       socket.to(roomId).emit("code-update", code);
     });
 

@@ -72,7 +72,7 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="relative select-text pointer-events-auto space-y-6 md:space-y-8">
       <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
         <motion.div {...riseIn} className="card overflow-hidden p-6 md:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -119,7 +119,6 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
           </motion.div>
         </motion.div>
 
-        {/* ... Rest of the component (Delivery pulse section, etc.) remains same ... */}
         <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.06 }} className="card p-6 md:p-7">
           <div className="flex items-center justify-between">
             <div>
@@ -154,7 +153,6 @@ export const DashboardPage = ({ onSearchIndex, onNotify }) => {
         </motion.div>
       </section>
 
-      {/* Projects and Timeline sections */}
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
           <motion.div {...riseIn} transition={{ ...riseIn.transition, delay: 0.08 }} className="flex items-center justify-between gap-4">
